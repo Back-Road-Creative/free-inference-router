@@ -1,0 +1,7 @@
+# Destination allowlist for tinyproxy (FilterExtended Yes, so these are
+# POSIX extended regexes). One anchored pattern per admitted provider host
+# in router/providers.json — anchors on both ends so e.g. `evil-groq.com`
+# or `api.groq.com.evil.tld` cannot match. Nothing else belongs here.
+^api\.groq\.com$
+^generativelanguage\.googleapis\.com$
+^openrouter\.ai$

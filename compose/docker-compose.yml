@@ -1,0 +1,105 @@
+# Phase 1 — offline runtime, FAKE providers only. Nothing here reaches a
+# real endpoint yet (router/providers.json admits none). This file is the
+# network boundary: Bifrost has no egress/allowed-host feature of its own
+# (verified against its client-config docs), so egress restriction is
+# built at the network layer — Bifrost lives on an `internal` (no default
+# route) network, and the only way out is the `proxy` service, which
+# enforces TWO independent controls: a client ACL (which containers may
+# use the proxy at all, by source IP/CIDR) and a destination filter (which
+# hosts the proxy will connect to). See compose/README.md and
+# compose/tinyproxy.conf for the distinction.
+#
+# Image digests are REAL, pinned 2026-08-30 (docker pull by digest
+# succeeded for both). alpine/tinyproxy:1.11.1 and bifrost:1.2.3 from the
+# Phase-1 draft do not exist on Docker Hub; the pins below do. Never
+# resolve to `latest`.
+
+services:
+  bifrost:
+    image: maximhq/bifrost:v1.6.11@sha256:ef8e686b3588884066ec3d0e57f3fc15136b11047ad94678adefe5a9573539af
+    container_name: router-bifrost
+    user: "10001:10001"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+      # mode=1777: the tmpfs mounts root-owned, and bifrost (uid 10001)
+      # must create config.db/logs.db inside it before startup
+      - /app/data:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: "1.0"
+    mem_limit: 1g
+    pids_limit: 128
+    networks:
+      - internal
+      # frontside exists ONLY so the host can reach the gateway on loopback:
+      # docker cannot publish ports for a container that is solely on an
+      # `internal` network. Masquerade is disabled on frontside, so there is
+      # no outbound NAT — bifrost still cannot reach the internet except
+      # through the proxy on `internal`.
+      - frontside
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      HTTPS_PROXY: "http://proxy:8888"
+      HTTP_PROXY: "http://proxy:8888"
+      NO_PROXY: "localhost,127.0.0.1"
+      # passed through by up-with-keys.sh (sops store -> container env
+      # only); empty default keeps offline `docker compose up` working
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+    volumes:
+      # nested bind inside the /app/data tmpfs: docker mounts by
+      # destination depth, so the file lands inside the tmpfs
+      - ./bifrost.config.json:/app/data/config.json:ro
+      - ./pricing.example.json:/app/data/pricing.json:ro
+      - ./model-parameters.example.json:/app/data/model-parameters.json:ro
+    # No `command:` override. The image bakes APP_DIR=/app/data into its env,
+    # and its entrypoint's arg parser busy-loops forever on any argument it
+    # doesn't recognise (`-app-dir` included) — verified 2026-08-30 against
+    # v1.6.11: the `*` branch re-appends the arg and never terminates.
+    depends_on:
+      - proxy
+
+  proxy:
+    image: kalaksi/tinyproxy:1.7@sha256:8f9269b0b5b7b872b2fe8471299330c9fcf2ffb12eebdbb152feb7b9084f866a
+    container_name: router-egress-proxy
+    user: "57981:57981"
+    read_only: true
+    tmpfs:
+      - /var/log/tinyproxy:size=8m
+      - /var/run/tinyproxy:size=4m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: "0.25"
+    mem_limit: 128m
+    pids_limit: 32
+    networks:
+      - internal
+      - egress
+    volumes:
+      - ./tinyproxy.conf:/etc/tinyproxy/tinyproxy.conf:ro
+      - ./tinyproxy.filter:/etc/tinyproxy/filter:ro
+
+networks:
+  internal:
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.77.0.0/24
+  frontside:
+    driver: bridge
+    driver_opts:
+      # no outbound NAT: published-port ingress works, egress packets from
+      # this network are unroutable — the proxy stays the only way out
+      com.docker.network.bridge.enable_ip_masquerade: "false"
+    ipam:
+      config:
+        - subnet: 10.78.0.0/24
+  egress:
+    driver: bridge

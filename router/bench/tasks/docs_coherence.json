@@ -1,0 +1,32 @@
+[
+  {
+    "task_id": "docs-driftctl-retry",
+    "role": "docs-coherence",
+    "scorer": "contains_all",
+    "scorer_args": {
+      "needles": ["--retry-limit", "--retry-backoff", "45 seconds"]
+    },
+    "max_tokens": 512,
+    "prompt": "Read the following excerpt from the driftctl command-line reference, then answer the question using only what the document says.\n\n---\ndriftctl sync — reconcile a local snapshot directory with its remote peer.\n\nUsage: driftctl sync [options] <snapshot-dir>\n\nNetwork options:\n  --peer <url>        Remote peer endpoint. Required unless DRIFTCTL_PEER is set.\n  --timeout <n>       Per-request timeout in seconds. Default: 30 seconds.\n  --retry-limit <n>   Maximum number of retry attempts after a failed transfer.\n                      Default: 4. Set to 0 to fail immediately on the first error.\n  --retry-backoff <n> Fixed pause between retry attempts. Default: 45 seconds.\n                      driftctl does not use exponential backoff; the pause is\n                      the same for every attempt.\n  --parallel <n>      Number of concurrent transfer workers. Default: 8.\n\nExit codes: 0 on success, 3 when the retry budget is exhausted, 5 on a\nlocal snapshot integrity failure. Transfers interrupted by SIGINT resume\nfrom the last committed chunk on the next invocation.\n---\n\nQuestion: When a transfer fails, how does driftctl sync retry it? Name the two flags that control retrying and state the default value of the pause between attempts, including its unit."
+  },
+  {
+    "task_id": "docs-packmule-bundle",
+    "role": "docs-coherence",
+    "scorer": "contains_all",
+    "scorer_args": {
+      "needles": ["zstd", "250 MB", "disabled by default"]
+    },
+    "max_tokens": 512,
+    "prompt": "Read the following excerpt from the packmule configuration reference, then answer the question using only what the document says.\n\n---\npackmule bundles build artifacts into content-addressed archives. Bundle\nbehaviour is controlled by the [bundle] table in packmule.toml.\n\n[bundle]\ncodec        String. Compression codec applied to every archive member.\n             One of \"zstd\", \"lz4\", or \"none\". Default: \"zstd\" at level 6.\n             Level is fixed per codec and is not configurable.\nmax_size     String with unit. Upper bound on a single bundle file before\n             packmule splits output into numbered parts. Default: \"250 MB\".\n             Accepted units are MB and GB only.\ndedup        Boolean. Content-level deduplication of identical members\n             across bundles in the same store. This feature is\n             disabled by default because it requires a store-wide index that grows with\n             every bundle; enable it only on stores under 100k bundles.\nsign         Boolean. Attach a detached signature to each part. Default:\n             true when a signing key is configured, false otherwise.\n---\n\nQuestion: With a stock packmule.toml that sets nothing in the [bundle] table, which compression codec is used, at what size does output get split into parts, and is deduplication on or off? Quote the document's own wording for the dedup setting."
+  },
+  {
+    "task_id": "docs-lumberd-rotation",
+    "role": "docs-coherence",
+    "scorer": "contains_all",
+    "scorer_args": {
+      "needles": ["rotate_every", "12 hours", "gzip"]
+    },
+    "max_tokens": 512,
+    "prompt": "Read the following excerpt from the lumberd daemon manual, then answer the question using only what the document says.\n\n---\nlumberd is a single-binary log collector. Rotation is governed by the\n[rotation] section of /etc/lumberd/lumberd.conf.\n\n[rotation]\nrotate_every   Duration. How often the active log file is closed and a new\n               one opened, regardless of size. Default: 12 hours. The\n               smallest accepted value is 15 minutes; sub-minute values are\n               rejected at startup with exit code 2.\nrotate_size    Size threshold that forces an early rotation. Default: 512 MB.\n               Set to 0 to rotate on time alone.\nkeep_files     Integer. Number of rotated files retained before the oldest\n               is deleted. Default: 9. The active file does not count\n               toward this limit.\ncompress_old   Codec applied to a file when it is rotated out. The only\n               supported codec is gzip; set to \"off\" to keep rotated files\n               uncompressed. Default: gzip at level 5.\n---\n\nQuestion: Out of the box, on what schedule does lumberd rotate its active log file, and what happens to a file once it has been rotated out? Name the setting that controls the schedule, its default value with unit, and the compression codec applied to rotated files."
+  }
+]

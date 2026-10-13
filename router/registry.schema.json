@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://backroadcreative.dev/schemas/free-inference-router/registry-entry.json",
+  "title": "Free Inference Router — provider/model registry entry",
+  "type": "object",
+  "required": [
+    "provider", "model_id", "status", "data_policy_class", "card_required",
+    "price_usd_per_mtok_in", "price_usd_per_mtok_out", "rpm", "rpd", "tpm",
+    "tpd", "reset_boundary", "allowed_roles", "max_attempts", "timeout_s",
+    "last_smoke", "source_url"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "provider": { "type": "string", "minLength": 1 },
+    "model_id": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["not-admitted", "admitted", "quarantined", "excluded"] },
+    "data_policy_class": { "type": "string", "enum": ["no-training", "training", "unknown"] },
+    "card_required": { "type": "string", "enum": ["yes", "no", "unverified"] },
+    "price_usd_per_mtok_in": { "type": ["number", "null"], "minimum": 0 },
+    "price_usd_per_mtok_out": { "type": ["number", "null"], "minimum": 0 },
+    "rpm": { "type": ["integer", "null"], "minimum": 0 },
+    "rpd": { "type": ["integer", "null"], "minimum": 0 },
+    "tpm": { "type": ["integer", "null"], "minimum": 0 },
+    "tpd": { "type": ["integer", "null"], "minimum": 0 },
+    "reset_boundary": { "type": ["string", "null"] },
+    "allowed_roles": { "type": "array", "items": { "type": "string" }, "minItems": 0 },
+    "max_attempts": { "type": "integer", "minimum": 1 },
+    "timeout_s": { "type": "integer", "minimum": 1 },
+    "last_smoke": { "type": ["string", "null"] },
+    "source_url": { "type": "string", "minLength": 1 },
+    "terms_hash": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
+    "billing_disabled_attested": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2} JP: .+$" },
+    "output_is_data": { "type": "boolean" }
+  }
+}

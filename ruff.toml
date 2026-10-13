@@ -1,0 +1,20 @@
+# Lint-family ratchet for svc-free-inference-router.
+#
+# pyproject.toml's [tool.ruff.lint] select (E F I B UP) is the enforced floor.
+# This file extends it with additional rule families that were measured
+# clean today (ruff 0.15.22, the version pinned in .pre-commit-config.yaml
+# and the Makefile) so they can never regress silently.
+#
+# A family joins extend-select only after `ruff check . --select <FAMILY>`
+# reports zero findings for the whole service. To add a new family: fix
+# every finding it reports first, confirm a clean run, then add it here.
+# Do not add per-file-ignores or a baseline to force a dirty family in.
+
+extend = "pyproject.toml"
+
+[lint]
+extend-select = [
+    "W",   # pycodestyle warnings
+    "TD",  # TODO comment formatting
+    "ERA", # commented-out code
+]

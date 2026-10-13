@@ -1,0 +1,23 @@
+# Coverage floor for svc-free-inference-router.
+#
+# pytest-cov reads [report] fail_under from this file when no
+# --cov-fail-under is passed on the command line (pytest_cov/plugin.py:270).
+# pyproject.toml is hard-denied for the merge robot; this file is not, so the
+# floor lives here.
+#
+# Measured 2026-09-03: TOTAL 94% (725 stmts, 40 miss) with
+#   nice -n 10 .venv/bin/pytest -q \
+#     -p no:cacheprovider --cov=router --cov-report=term \
+#     --cov-fail-under=0 -x
+# Floor = floor(94) - 1 = 93.
+#
+# Inert until `--cov=router` is added to pyproject addopts (S2): CI runs bare
+# `.venv/bin/pytest`, and without --cov pytest-cov never consults this file.
+#
+# Migrated settings: none — pyproject.toml had no [tool.coverage.*] sections
+# on 2026-09-03, so nothing changes hands. (coverage reads this file INSTEAD
+# of pyproject.toml when both exist; add any future [tool.coverage.*] setting
+# here, not there.)
+
+[report]
+fail_under = 93

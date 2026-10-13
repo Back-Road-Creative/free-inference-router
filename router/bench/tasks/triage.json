@@ -1,0 +1,35 @@
+[
+  {
+    "task_id": "triage-ledger-keyerror",
+    "role": "triage",
+    "prompt": "You are triaging a bug in a small fictional Python billing tool. Files in the project:\n\n- billing/ledger.py  (Ledger class: add_entry, balance_for)\n- billing/cli.py     (argument parsing, dispatches to Ledger)\n- billing/render.py  (formats statements as text tables)\n\nRunning `billing report --account acme` crashes:\n\nTraceback (most recent call last):\n  File \"billing/cli.py\", line 41, in main\n    total = ledger.balance_for(args.account)\n  File \"billing/ledger.py\", line 58, in balance_for\n    entries = self._by_account[account]\nKeyError: 'acme'\n\nThe account 'acme' definitely has entries added via add_entry earlier in the same run. Which ONE file most likely contains the bug? Answer with the file path exactly as listed, then briefly justify.",
+    "scorer": "file_rank_top1",
+    "scorer_args": {
+      "expected_file": "billing/ledger.py",
+      "decoys": ["billing/cli.py", "billing/render.py"]
+    },
+    "max_tokens": 256
+  },
+  {
+    "task_id": "triage-render-typeerror",
+    "role": "triage",
+    "prompt": "Triage a bug in a fictional Python invoicing library. Files:\n\n- invoicing/models.py  (Invoice dataclass; total_cents is an int)\n- invoicing/render.py  (render_invoice builds the printable statement)\n- invoicing/tax.py     (compute_tax returns an int number of cents)\n\nGenerating a statement fails:\n\nTraceback (most recent call last):\n  File \"invoicing/render.py\", line 27, in render_invoice\n    footer = \"TOTAL: \" + invoice.total_cents\nTypeError: can only concatenate str (not \"int\") to str\n\ntotal_cents is documented and typed as int everywhere else, and compute_tax's int return is covered by tests. Which ONE file most likely contains the bug? Name the file exactly as listed, then explain in one sentence.",
+    "scorer": "file_rank_top1",
+    "scorer_args": {
+      "expected_file": "invoicing/render.py",
+      "decoys": ["invoicing/models.py", "invoicing/tax.py"]
+    },
+    "max_tokens": 256
+  },
+  {
+    "task_id": "triage-cli-offbyone",
+    "role": "triage",
+    "prompt": "Triage a symptom in a fictional Python pantry-inventory app. Files:\n\n- pantry/store.py   (Store.items() returns items sorted by expiry date)\n- pantry/cli.py     (the `soonest` command: takes --limit N, slices the sorted list with items[1:limit] and prints them)\n- pantry/report.py  (weekly email summary, not used by `soonest`)\n\nSymptom: `pantry soonest --limit 3` always omits the single item that expires FIRST, printing the 2nd and 3rd soonest instead. Store.items() is verified by tests to return the full list correctly sorted. Which ONE file most likely contains the bug? Answer with the file path exactly as listed, then justify briefly.",
+    "scorer": "file_rank_top1",
+    "scorer_args": {
+      "expected_file": "pantry/cli.py",
+      "decoys": ["pantry/store.py", "pantry/report.py"]
+    },
+    "max_tokens": 256
+  }
+]

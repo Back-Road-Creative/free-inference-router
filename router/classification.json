@@ -1,0 +1,5 @@
+{
+  "_note": "Phase-0a approval is this file's commit (docs(router): record the Phase-0a provider, data and cost policy). Default-deny: an unlisted repo/path is not routable to any remote provider. Only the public and synthetic data classes are routable to the R1 (free remote) lane today; private is never routable to R1, per docs/POLICY.md.",
+  "default": "deny",
+  "repos": {}
+}

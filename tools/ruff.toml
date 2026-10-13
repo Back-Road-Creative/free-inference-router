@@ -1,0 +1,7 @@
+# tools/ is shared by every public repository (lib-oss-export COMPONENTS), so it
+# follows the shared ci/ config rather than this project's. E501 is off: its
+# long lines are strings and comments ruff format leaves alone.
+extend = "../ci/ruff.toml"
+
+[lint]
+ignore = ["E501"]

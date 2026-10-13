@@ -1,0 +1,38 @@
+[
+  {
+    "task_id": "tgen-clamp",
+    "role": "test-gen",
+    "prompt": "Here is `target.py`, a tiny utility module from a fictional settings library:\n\n```python\ndef clamp(value, lo, hi):\n    \"\"\"Return value limited to the closed range [lo, hi].\"\"\"\n    if lo > hi:\n        raise ValueError('lo must not exceed hi')\n    if value < lo:\n        return lo\n    if value > hi:\n        return hi\n    return value\n```\n\nWrite tests for this module. Rules: import from `target` (`from target import ...`); write `def test_...` functions with plain `assert` statements; pytest is NOT installed, the file is run as `python tests.py`, so call every test function at the bottom of the file. Cover normal input, boundaries and defaults. Reply with the test file only, in one ```python fence.",
+    "scorer": "mutation_kill",
+    "scorer_args": {
+      "pristine_module": "def clamp(value, lo, hi):\n    \"\"\"Return value limited to the closed range [lo, hi].\"\"\"\n    if lo > hi:\n        raise ValueError('lo must not exceed hi')\n    if value < lo:\n        return lo\n    if value > hi:\n        return hi\n    return value\n",
+      "mutant_module": "def clamp(value, lo, hi):\n    \"\"\"Return value limited to the closed range [lo, hi].\"\"\"\n    if lo > hi:\n        raise ValueError('lo must not exceed hi')\n    if value < lo:\n        return lo\n    if value < hi:\n        return hi\n    return value\n",
+      "module_name": "target"
+    },
+    "max_tokens": 512
+  },
+  {
+    "task_id": "tgen-paginate",
+    "role": "test-gen",
+    "prompt": "Here is `target.py`, the pagination helper of a fictional catalogue API:\n\n```python\ndef paginate(items, page, per_page=10):\n    \"\"\"Return the items on 1-based page number `page`.\"\"\"\n    if page < 1 or per_page < 1:\n        raise ValueError('page and per_page must be >= 1')\n    start = (page - 1) * per_page\n    return list(items[start:start + per_page])\n```\n\nWrite tests for this module. Rules: import from `target` (`from target import ...`); write `def test_...` functions with plain `assert` statements; pytest is NOT installed, the file is run as `python tests.py`, so call every test function at the bottom of the file. Cover normal input, boundaries and defaults. Reply with the test file only, in one ```python fence.",
+    "scorer": "mutation_kill",
+    "scorer_args": {
+      "pristine_module": "def paginate(items, page, per_page=10):\n    \"\"\"Return the items on 1-based page number `page`.\"\"\"\n    if page < 1 or per_page < 1:\n        raise ValueError('page and per_page must be >= 1')\n    start = (page - 1) * per_page\n    return list(items[start:start + per_page])\n",
+      "mutant_module": "def paginate(items, page, per_page=10):\n    \"\"\"Return the items on 1-based page number `page`.\"\"\"\n    if page < 1 or per_page < 1:\n        raise ValueError('page and per_page must be >= 1')\n    start = page * per_page\n    return list(items[start:start + per_page])\n",
+      "module_name": "target"
+    },
+    "max_tokens": 512
+  },
+  {
+    "task_id": "tgen-parse-bool",
+    "role": "test-gen",
+    "prompt": "Here is `target.py`, the flag parser of a fictional config loader:\n\n```python\nTRUE_WORDS = {'1', 'true', 'yes', 'y', 'on'}\nFALSE_WORDS = {'0', 'false', 'no', 'n', 'off'}\n\n\ndef parse_bool(text, default=False):\n    \"\"\"Parse a yes/no style word; unrecognised text yields `default`.\"\"\"\n    word = text.strip().lower()\n    if word in TRUE_WORDS:\n        return True\n    if word in FALSE_WORDS:\n        return False\n    return default\n```\n\nWrite tests for this module. Rules: import from `target` (`from target import ...`); write `def test_...` functions with plain `assert` statements; pytest is NOT installed, the file is run as `python tests.py`, so call every test function at the bottom of the file. Cover normal input, boundaries and defaults. Reply with the test file only, in one ```python fence.",
+    "scorer": "mutation_kill",
+    "scorer_args": {
+      "pristine_module": "TRUE_WORDS = {'1', 'true', 'yes', 'y', 'on'}\nFALSE_WORDS = {'0', 'false', 'no', 'n', 'off'}\n\n\ndef parse_bool(text, default=False):\n    \"\"\"Parse a yes/no style word; unrecognised text yields `default`.\"\"\"\n    word = text.strip().lower()\n    if word in TRUE_WORDS:\n        return True\n    if word in FALSE_WORDS:\n        return False\n    return default\n",
+      "mutant_module": "TRUE_WORDS = {'1', 'true', 'yes', 'y', 'on'}\nFALSE_WORDS = {'0', 'false', 'no', 'n', 'off'}\n\n\ndef parse_bool(text, default=True):\n    \"\"\"Parse a yes/no style word; unrecognised text yields `default`.\"\"\"\n    word = text.strip().lower()\n    if word in TRUE_WORDS:\n        return True\n    if word in FALSE_WORDS:\n        return False\n    return default\n",
+      "module_name": "target"
+    },
+    "max_tokens": 512
+  }
+]

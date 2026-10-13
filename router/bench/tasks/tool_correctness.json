@@ -1,0 +1,100 @@
+[
+  {
+    "task_id": "tool-deploy-widgetsvc",
+    "role": "tool-correctness",
+    "prompt": "You manage a fictional demo cluster. Deploy the service named 'widgetsvc' at version '2.4.1' by calling the deploy_service tool with those exact values. Respond only with the tool call.",
+    "scorer": "tool_call_named",
+    "scorer_args": {
+      "name": "deploy_service",
+      "required_args": ["service", "version"]
+    },
+    "max_tokens": 256,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "deploy_service",
+          "description": "Deploy a named service at a given version to the fictional demo cluster.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "service": {
+                "type": "string",
+                "description": "Name of the service to deploy."
+              },
+              "version": {
+                "type": "string",
+                "description": "Semver version string to deploy."
+              }
+            },
+            "required": ["service", "version"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "task_id": "tool-run-tests-parser",
+    "role": "tool-correctness",
+    "prompt": "In this fictional codebase, run the unit tests for the parser module by calling the run_test_suite tool with path set to 'tests/unit/parser'. Respond only with the tool call.",
+    "scorer": "tool_call_named",
+    "scorer_args": {
+      "name": "run_test_suite",
+      "required_args": ["path"]
+    },
+    "max_tokens": 256,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "run_test_suite",
+          "description": "Run the test suite found at the given path in the fictional codebase.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Directory or file path of the tests to run."
+              }
+            },
+            "required": ["path"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "task_id": "tool-search-todo-files",
+    "role": "tool-correctness",
+    "prompt": "Search this fictional project for files whose names match the glob pattern '*.todo' by calling the search_files tool with pattern '*.todo' and max_results 10. Respond only with the tool call.",
+    "scorer": "tool_call_named",
+    "scorer_args": {
+      "name": "search_files",
+      "required_args": ["pattern", "max_results"]
+    },
+    "max_tokens": 256,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "search_files",
+          "description": "Search the fictional project tree for file names matching a glob pattern.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "Glob pattern to match file names against."
+              },
+              "max_results": {
+                "type": "integer",
+                "description": "Maximum number of matches to return."
+              }
+            },
+            "required": ["pattern", "max_results"]
+          }
+        }
+      }
+    ]
+  }
+]

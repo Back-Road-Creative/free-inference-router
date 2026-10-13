@@ -1,0 +1,28 @@
+{
+  "status": "preregistered-before-any-test-read",
+  "schema": "laya-candidate/v1",
+  "date": "2026-09-25",
+  "feature_builder_sha256": "sha256:81e1610ff9f8964af9e7721bc1b81b8de8704f449a9b63d3cb72a8748f13d6d1",
+  "feature_builder_module": "router/candidates.py",
+  "note": "feature_builder_sha256(candidates.py) at write time -- freezes state_text before any test read (plan Y0 gate 4); ensure_test_split_authorized refuses --split test on a hash mismatch. Per-candidate gates: docs/LAYA-CANDIDATES.md.",
+  "candidates": {
+    "y1a-ci-failure-triage": {
+      "metrics": ["precision", "recall", "balanced_accuracy", "coverage"],
+      "false_negative_limit": 0.05,
+      "coverage_floor": 0.5,
+      "latency_budget_s": 1.0
+    },
+    "y1b-affected-selection-advisory": {
+      "metrics": ["precision", "recall", "balanced_accuracy", "coverage"],
+      "false_negative_limit": 0.01,
+      "coverage_floor": 0.3,
+      "latency_budget_s": 1.0
+    },
+    "y1c-wake-prioritization": {
+      "metrics": ["precision", "recall", "balanced_accuracy", "coverage"],
+      "false_negative_limit": 0.10,
+      "coverage_floor": 0.5,
+      "latency_budget_s": 0.5
+    }
+  }
+}

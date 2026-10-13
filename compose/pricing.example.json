@@ -1,0 +1,14 @@
+{
+  "groq/openai/gpt-oss-120b": {
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "groq",
+    "mode": "chat"
+  },
+  "groq/openai/gpt-oss-20b": {
+    "input_cost_per_token": 0.0,
+    "output_cost_per_token": 0.0,
+    "litellm_provider": "groq",
+    "mode": "chat"
+  }
+}

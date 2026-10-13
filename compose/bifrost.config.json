@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "_note": "Phase 1 offline runtime \u2014 no provider is admitted yet. Providers are added one PR at a time in Phase 2, each gated by router/providers.json status flipping to 'admitted' and re-approved terms. Keys enter only as process env referenced by name below (env.<VAR>), never as literal values.",
+  "providers": {
+    "groq": {
+      "keys": [
+        {
+          "name": "groq-primary",
+          "value": "env.GROQ_API_KEY",
+          "models": [
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "proxy_config": {
+        "type": "http",
+        "url": "http://proxy:8888"
+      }
+    },
+    "openrouter": {
+      "keys": [
+        {
+          "name": "openrouter-primary",
+          "value": "env.OPENROUTER_API_KEY",
+          "models": [
+            "inclusionai/ling-3.0-flash-fin:free",
+            "poolside/laguna-s-2.1:free"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "proxy_config": {
+        "type": "http",
+        "url": "http://proxy:8888"
+      }
+    },
+    "gemini": {
+      "keys": [
+        {
+          "name": "gemini-primary",
+          "value": "env.GEMINI_API_KEY",
+          "models": [
+            "gemini-3.5-flash",
+            "gemini-3.5-flash-lite"
+          ],
+          "weight": 1.0
+        }
+      ],
+      "proxy_config": {
+        "type": "http",
+        "url": "http://proxy:8888"
+      }
+    }
+  },
+  "disable_content_logging": true,
+  "allow_per_request_content_storage_override": false,
+  "retain_content_in_object_storage": false,
+  "log_retention_days": 14,
+  "semantic_cache_enabled": false,
+  "observability_connectors": [],
+  "example_key_reference": "env.GROQ_API_KEY",
+  "config_store": {
+    "enabled": false
+  },
+  "_note_config_store": "file-only mode: config is read into memory at startup and never written back; no SQLite store, so the read-only bind mount is safe and UI edits are disabled by design.",
+  "framework": {
+    "pricing": {
+      "pricing_url": "file:///app/data/pricing.json",
+      "pricing_sync_interval": 86400,
+      "live_models_sync_interval": 0,
+      "model_parameters_url": "file:///app/data/model-parameters.json"
+    }
+  },
+  "_note_pricing": "pricing_url points at the read-only local file mounted by compose \u2014 the sealed internal network correctly blocks the default getbifrost.ai fetch, which is fatal at startup (verified v1.6.11). live_models_sync_interval 0 disables background provider-list fetches."
+}

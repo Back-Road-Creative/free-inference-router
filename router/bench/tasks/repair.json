@@ -1,0 +1,35 @@
+[
+  {
+    "task_id": "repair-fizzbuzz",
+    "role": "repair",
+    "prompt": "`target.py` from a fictional coding-kata repo has a red test:\n\n```python\ndef fizzbuzz(n):\n    if n % 3 == 0:\n        return 'Fizz'\n    if n % 5 == 0:\n        return 'Buzz'\n    if n % 15 == 0:\n        return 'FizzBuzz'\n    return str(n)\n```\n\nFailing test output:\n\ntest_fizzbuzz_multiples_of_fifteen: AssertionError\n  assert fizzbuzz(15) == 'FizzBuzz'  ->  'Fizz' != 'FizzBuzz'\n\nFix the bug in `target.py`. Reply with the complete repaired module only, in one ```python fence — no tests, no explanation. Keep the public names unchanged.",
+    "scorer": "repair_green",
+    "scorer_args": {
+      "test_code": "from target import fizzbuzz\n\n\ndef test_plain_numbers():\n    assert fizzbuzz(1) == '1'\n    assert fizzbuzz(7) == '7'\n\n\ndef test_fizz_and_buzz():\n    assert fizzbuzz(3) == 'Fizz'\n    assert fizzbuzz(10) == 'Buzz'\n\n\ndef test_fizzbuzz_multiples_of_fifteen():\n    assert fizzbuzz(15) == 'FizzBuzz'\n    assert fizzbuzz(30) == 'FizzBuzz'\n\n\ntest_plain_numbers()\ntest_fizz_and_buzz()\ntest_fizzbuzz_multiples_of_fifteen()\n",
+      "module_name": "target"
+    },
+    "max_tokens": 512
+  },
+  {
+    "task_id": "repair-running-total",
+    "role": "repair",
+    "prompt": "`target.py` from a fictional ledger tool has a red test:\n\n```python\ndef running_total(values):\n    \"\"\"Cumulative sums: [1, 2, 3] -> [1, 3, 6].\"\"\"\n    totals = []\n    acc = 0\n    for v in values[1:]:\n        acc += v\n        totals.append(acc)\n    return totals\n```\n\nFailing test output:\n\ntest_cumulative: AssertionError\n  assert running_total([1, 2, 3]) == [1, 3, 6]  ->  [2, 5] != [1, 3, 6]\n\nFix the bug in `target.py`. Reply with the complete repaired module only, in one ```python fence — no tests, no explanation. Keep the public names unchanged.",
+    "scorer": "repair_green",
+    "scorer_args": {
+      "test_code": "from target import running_total\n\n\ndef test_empty():\n    assert running_total([]) == []\n\n\ndef test_single():\n    assert running_total([4]) == [4]\n\n\ndef test_cumulative():\n    assert running_total([1, 2, 3]) == [1, 3, 6]\n    assert running_total([5, -5, 10]) == [5, 0, 10]\n\n\ntest_empty()\ntest_single()\ntest_cumulative()\n",
+      "module_name": "target"
+    },
+    "max_tokens": 512
+  },
+  {
+    "task_id": "repair-inventory",
+    "role": "repair",
+    "prompt": "`target.py` from a fictional stockroom app has a red test:\n\n```python\nclass Inventory:\n    def __init__(self):\n        self._stock = {}\n\n    def add(self, name, qty):\n        self._stock[name] = self._stock.get(name, 0) + qty\n\n    def remove(self, name, qty):\n        have = self._stock.get(name, 0)\n        self._stock[name] = have - qty\n\n    def count(self, name):\n        return self._stock.get(name, 0)\n```\n\nFailing test output:\n\ntest_remove_more_than_stocked_raises_and_keeps_stock: AssertionError: expected ValueError\n  (after inv.add('nut', 2); inv.remove('nut', 3) — stock must stay 2)\n\nFix the bug in `target.py`. Reply with the complete repaired module only, in one ```python fence — no tests, no explanation. Keep the public names unchanged.",
+    "scorer": "repair_green",
+    "scorer_args": {
+      "test_code": "from target import Inventory\n\n\ndef test_add_and_remove():\n    inv = Inventory()\n    inv.add('bolt', 5)\n    inv.remove('bolt', 2)\n    assert inv.count('bolt') == 3\n\n\ndef test_remove_more_than_stocked_raises_and_keeps_stock():\n    inv = Inventory()\n    inv.add('nut', 2)\n    try:\n        inv.remove('nut', 3)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('expected ValueError')\n    assert inv.count('nut') == 2\n\n\ndef test_unknown_item_counts_zero():\n    assert Inventory().count('gear') == 0\n\n\ntest_add_and_remove()\ntest_remove_more_than_stocked_raises_and_keeps_stock()\ntest_unknown_item_counts_zero()\n",
+      "module_name": "target"
+    },
+    "max_tokens": 512
+  }
+]
