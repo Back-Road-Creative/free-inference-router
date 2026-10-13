@@ -84,7 +84,11 @@ jobs:
           # Hypothesis keeps its example database outside the tree, so the
           # cleanliness check below sees no unknown output.
           HYPOTHESIS_STORAGE_DIRECTORY: ${{ runner.temp }}/hypothesis
-        run: .venv/bin/pytest
+        # The bundle tests exercise router/bundle.py's detect-secrets scan and
+        # skip when the pinned scanner (ci/tools-requirements.txt, installed in
+        # ci-tools above) is not on PATH; skipped, coverage lands under the
+        # .coveragerc floor.
+        run: PATH="$RUNNER_TEMP/ci-tools/bin:$PATH" .venv/bin/pytest
 
       # Runs after a failed build too: a build or test that writes into the
       # tree, or leaves anything behind that is not a known cache, fails here.
