@@ -1,4 +1,4 @@
-# svc-free-inference-router
+# free-inference-router
 
 ## Purpose
 

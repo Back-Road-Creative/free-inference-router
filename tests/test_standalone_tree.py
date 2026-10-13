@@ -1,8 +1,10 @@
 """The service tree reads as a standalone project.
 
 It is cut to its own public repository, so nothing in it may point at the
-monorepo layout or one machine's paths, operator-local configs ship as
-``*.example.json``, and the licence the package metadata declares is present.
+monorepo layout, one machine's paths or any monorepo service directory
+name (its own included: the public checkout is not named ``svc-``), operator-local
+configs ship as ``*.example.json``, and the licence the package metadata declares
+is present.
 """
 
 from __future__ import annotations
@@ -12,8 +14,10 @@ from pathlib import Path
 
 SERVICE = Path(__file__).resolve().parent.parent
 MACHINE_PATHS = re.compile(r"\b_active/|/home/[a-z]+/")
-# Another monorepo service's directory name says where the tree came from.
-OTHER_SERVICES = re.compile(r"\bsvc-[a-z][a-z0-9-]*")
+# A monorepo service directory name says where the tree came from. The tree's
+# own is no exception: the public checkout is named after the package, so a
+# self-reference reads as another service there.
+SERVICE_NAMES = re.compile(r"\bsvc-[a-z][a-z0-9-]*")
 # pyproject.toml is edited only by a human here; the public cut rewrites its
 # comments with a patch, and the cut's own scan re-checks the result.
 CUT_PATCHED = {"pyproject.toml"}
@@ -53,13 +57,13 @@ def test_no_monorepo_or_machine_paths() -> None:
     assert hits == []
 
 
-def test_no_other_monorepo_service_names() -> None:
+def test_no_monorepo_service_names() -> None:
     hits = [
         f"{p.relative_to(SERVICE)}:{n}"
         for p in _tracked_text_files()
         if p.name not in CUT_PATCHED
         for n, line in enumerate(p.read_text().splitlines(), 1)
-        if set(OTHER_SERVICES.findall(line)) - {SERVICE.name}
+        if SERVICE_NAMES.search(line)
     ]
     assert hits == []
 

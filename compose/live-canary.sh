@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Opt-in LIVE network canary for the Phase 1 egress boundary. Never run by
-# CI or by tests/test_router_egress_compose.py — this touches the real
+# CI or by the router's tests/test_egress_compose.py — this touches the real
 # network. Proves: a request to a non-admitted host through the gateway's
 # proxy fails, and a request to an admitted host reaches the network.
 set -euo pipefail

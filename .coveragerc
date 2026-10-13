@@ -1,4 +1,4 @@
-# Coverage floor for svc-free-inference-router.
+# Coverage floor for free-inference-router.
 #
 # pytest-cov reads [report] fail_under from this file when no
 # --cov-fail-under is passed on the command line (pytest_cov/plugin.py:270).

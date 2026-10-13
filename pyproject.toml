@@ -16,7 +16,7 @@ authors = [{ name = "Back Road Creative" }]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4.0", "pytest-cov", "ruff>=0.4.0", "mypy>=1.0.0", "hypothesis>=6.100"]
+dev = ["pytest>=7.4.0", "pytest-cov", "ruff>=0.4.0", "mypy>=1.0.0", "hypothesis>=6.100", "pyyaml>=6.0", "types-PyYAML"]
 # Offline evaluation only (JP decision D1, 2026-09-22): router/decide.py's
 # OnnxLayaScorer imports onnxruntime lazily and only when instantiated, so
 # this extra is opt-in and never required by `dependencies` above -- the

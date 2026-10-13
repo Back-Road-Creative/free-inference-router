@@ -1,4 +1,4 @@
-# Lint-family ratchet for svc-free-inference-router.
+# Lint-family ratchet for free-inference-router.
 #
 # pyproject.toml's [tool.ruff.lint] select (E F I B UP) is the enforced floor.
 # This file extends it with additional rule families that were measured
