@@ -24,11 +24,15 @@ carry no payment method and no balance. `card_required: unverified` is
 treated as `yes` for gating until JP confirms otherwise. RPM/RPD/TPM/TPD
 caps live in `router/providers.json`; a remote row with a null `rpd` is
 **refused outright** (`uncapped`) — only the `local` lane runs uncapped. Google's
-free tier is billing-gated, so its rows also need `billing_disabled_attested`
-(`"<date> JP: <project-id>"`) before admission. Re-admitted 2026-09-02 with
-the AI Studio free-tier caps (flash 5 rpm / 250k tpm / 20 rpd; flash-lite
-15 / 250k / 500; reset daily 00:00 Pacific) once JP attested project
-`gen-lang-client-0953111595` has no billing account linked. A local counter checks headroom
+free tier is billing-gated, so its rows carry `billing_gated: true` and are
+refused by the selector and the bench runner until `billing_disabled_attested`
+(`"<date> JP: <project-id>"`) is set. The attestation names JP's cloud project,
+so it lives in the private overlay `$FIR_INPUTS_DIR/providers.local.json`
+(merged per provider+model, attest-only), never in the tracked registry, which
+ships it null. Re-admitted 2026-09-02 with the AI Studio free-tier caps (flash
+5 rpm / 250k tpm / 20 rpd; flash-lite 15 / 250k / 500; reset daily 00:00
+Pacific) once JP attested
+the attested project (private registry) has no billing account linked. A local counter checks headroom
 **before** the call — a 429 never discovers a cap. Groq's binding limit is
 TPM (8,000 on the free `gpt-oss` models), so Groq is bounded-artifact roles
 only (diagnosis, one test idea, small-diff review) — never whole-file repair.

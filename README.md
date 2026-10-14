@@ -27,6 +27,17 @@ lives in `.data/plans/2026-08-29-local-first-free-inference-routing.md`. Per D6,
 only JP creates provider accounts, accepts terms, and handles keys (via
 `sops-edit`) — no agent here ever signs up or touches a key.
 
+## Private registry overlay
+
+`providers.json` is public data and carries no operator identifiers. A
+billing-gated row (`billing_gated: true`, Google's free tier) ships with
+`billing_disabled_attested: null` and is refused by the selector and the bench
+runner until the operator attests it in `$FIR_INPUTS_DIR/providers.local.json`:
+a list of `{"provider", "model_id", "billing_disabled_attested"}` rows merged
+onto the tracked registry per provider+model. The overlay may only attest; a
+row that sets any other key, or names a pair not in the registry, fails the
+load. `FIR_INPUTS_DIR` unset (a public checkout, CI) means no overlay.
+
 ## Local provider (bench lane)
 
 The bench runner also knows a `local` provider: a model id prefixed

@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from router import load_providers
+from router import billing_attested, load_providers
 from router.bench.sandbox import SandboxUnavailableError
 from router.bench.schema import Task
 from router.bench.scoring import TOOL_CALL_SCORERS, score
@@ -79,6 +79,8 @@ def _caps_for(model: str) -> dict[str, Any]:
         if e["provider"] == provider and e["model_id"] == model_id:
             if e["status"] != "admitted":
                 raise PermissionError(f"{model} is not admitted")
+            if not billing_attested(e):
+                raise PermissionError(f"{model} is billing-gated and not attested")
             return e
     raise KeyError(f"{model} not in registry")
 

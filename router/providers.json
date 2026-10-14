@@ -132,7 +132,8 @@
     "last_smoke": "2026-08-31T14:20:00Z",
     "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
     "terms_hash": "sha256:f1ce14a476361515157fd04a84994c4de6140cb8e193d6f45f735c444a2719df",
-    "billing_disabled_attested": "2026-09-02 JP: gen-lang-client-0953111595"
+    "billing_disabled_attested": null,
+    "billing_gated": true
   },
   {
     "provider": "google",
@@ -156,7 +157,8 @@
     "last_smoke": "2026-08-31T14:20:00Z",
     "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
     "terms_hash": "sha256:f1ce14a476361515157fd04a84994c4de6140cb8e193d6f45f735c444a2719df",
-    "billing_disabled_attested": "2026-09-02 JP: gen-lang-client-0953111595"
+    "billing_disabled_attested": null,
+    "billing_gated": true
   },
   {
     "provider": "local",
