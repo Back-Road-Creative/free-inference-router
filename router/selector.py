@@ -28,6 +28,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from router import billing_attested
+
 Shape = Literal[
     "deterministic",
     "judgment",
@@ -94,6 +96,8 @@ def repo_permits_remote(classification: dict[str, Any], repo: str) -> bool:
 def provider_eligible(entry: dict[str, Any], task: Task) -> bool:
     """Whether one registry entry may serve one task on R1."""
     if entry.get("status") != "admitted":
+        return False
+    if not billing_attested(entry):
         return False
     if task.role not in entry.get("allowed_roles", []):
         return False

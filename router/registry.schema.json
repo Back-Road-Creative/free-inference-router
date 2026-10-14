@@ -30,6 +30,7 @@
     "source_url": { "type": "string", "minLength": 1 },
     "terms_hash": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
     "billing_disabled_attested": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2} JP: .+$" },
+    "billing_gated": { "type": "boolean" },
     "output_is_data": { "type": "boolean" }
   }
 }

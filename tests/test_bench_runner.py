@@ -116,12 +116,35 @@ def test_failed_status_recorded_not_passed(
     assert "rate limited" in (res[0].error or "")
 
 
-def test_gemini_model_maps_to_google_registry_row() -> None:
+def test_gemini_model_maps_to_google_registry_row(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     assert runner_mod._provider_of("gemini/gemini-3.5-flash") == "google"
-    # Re-admitted 2026-09-02 with the AI Studio free-tier caps and JP's
-    # billing_disabled_attested; the runner builds caps from the row again.
+    # Re-admitted 2026-09-02 with the AI Studio free-tier caps; the row is
+    # billing-gated, so the runner builds caps from it only once the private
+    # overlay (FIR_INPUTS_DIR/providers.local.json) attests it.
+    (tmp_path / "providers.local.json").write_text(
+        json.dumps(
+            [
+                {
+                    "provider": "google",
+                    "model_id": "gemini-3.5-flash",
+                    "billing_disabled_attested": "2026-01-01 JP: fixture",
+                },
+            ]
+        )
+    )
+    monkeypatch.setenv("FIR_INPUTS_DIR", str(tmp_path))
     caps = runner_mod._caps_for("gemini/gemini-3.5-flash")
     assert (caps["rpm"], caps["rpd"], caps["tpm"]) == (5, 20, 250000)
+
+
+def test_runner_refuses_a_billing_gated_row_without_attestation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    with pytest.raises(PermissionError, match="attest"):
+        runner_mod._caps_for("gemini/gemini-3.5-flash")
 
 
 def test_runresult_carries_no_prompt_or_reply_fields() -> None:

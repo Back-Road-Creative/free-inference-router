@@ -126,6 +126,39 @@ def test_real_registry_private_still_never_selects_r1() -> None:
     assert decision.lane != "R1"
 
 
+# ------------------------------------------------------------ billing gate
+
+
+def test_billing_gated_row_without_attestation_is_not_eligible() -> None:
+    """A billing-gated row (google's free tier exists only while the key's
+    cloud project has no billing account) is refused until a human attests
+    it. The tracked registry ships the row with a null attestation; the
+    attestation itself lives in the private overlay (FIR_INPUTS_DIR)."""
+    entry = _entry(billing_gated=True, billing_disabled_attested=None)
+    assert not provider_eligible(entry, _task(role="diagnosis"))
+
+
+def test_billing_gated_row_with_attestation_is_eligible() -> None:
+    entry = _entry(
+        billing_gated=True, billing_disabled_attested="2026-01-01 JP: fixture"
+    )
+    assert provider_eligible(entry, _task(role="diagnosis"))
+
+
+def test_ungated_row_needs_no_attestation() -> None:
+    assert provider_eligible(_entry(billing_disabled_attested=None), _task())
+
+
+def test_real_registry_google_rows_are_gated_and_refused_without_overlay(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    google = [e for e in load_providers() if e["provider"] == "google"]
+    assert google and all(e["billing_gated"] for e in google)
+    task = _task(data_class="synthetic", role="synthetic-benchmark")
+    assert not any(provider_eligible(e, task) for e in google)
+
+
 # ------------------------------------------------------------ training class
 
 
