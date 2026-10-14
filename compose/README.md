@@ -112,7 +112,7 @@ host (`example.com`) must fail, and a request to an admitted host must
 reach the network (a real 4xx from the provider counts as "reachable" —
 this canary tests egress, not auth). It refuses to run unless
 `ROUTER_LIVE_CANARY=1` is set, and it is never invoked by the pytest
-suite (`tests/test_router_egress_compose.py` asserts that). Run it
+suite (the router's `tests/test_egress_compose.py` asserts that). Run it
 manually from the service directory:
 
 ```

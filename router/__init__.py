@@ -1,4 +1,4 @@
-"""svc-free-inference-router: deterministic lane selection for free LLM providers.
+"""free-inference-router: deterministic lane selection for free LLM providers.
 
 The router is code and policy, never an LLM prompt. Every module here enforces a
 rule written down first in ``docs/POLICY.md``; nothing dispatches to a real
