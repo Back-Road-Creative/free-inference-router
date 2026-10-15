@@ -152,7 +152,7 @@ def test_ungated_row_needs_no_attestation() -> None:
 def test_real_registry_google_rows_are_gated_and_refused_without_overlay(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    monkeypatch.setenv("FIR_INPUTS_DIR", "")
     google = [e for e in load_providers() if e["provider"] == "google"]
     assert google and all(e["billing_gated"] for e in google)
     task = _task(data_class="synthetic", role="synthetic-benchmark")

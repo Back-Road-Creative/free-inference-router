@@ -142,7 +142,7 @@ def test_gemini_model_maps_to_google_registry_row(
 def test_runner_refuses_a_billing_gated_row_without_attestation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    monkeypatch.setenv("FIR_INPUTS_DIR", "")
     with pytest.raises(PermissionError, match="attest"):
         runner_mod._caps_for("gemini/gemini-3.5-flash")
 

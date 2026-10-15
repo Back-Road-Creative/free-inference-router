@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -16,9 +17,15 @@ __version__ = "0.1.0"
 
 DATA_DIR = Path(__file__).resolve().parent
 
-#: Directory holding the operator's private inputs. Unset (the public checkout,
-#: CI) means no overlay: every billing-gated row stays unattested and refused.
+#: Directory holding the operator's private inputs. Set to a path: that dir.
+#: Set to "" (the test suite's default): no overlay. Unset: the first
+#: ``_private/<checkout name>`` beside an ancestor of the checkout, if any —
+#: no launcher exports the variable, so the bench lane finds the operator's
+#: layer on its own. No overlay means every billing-gated row stays refused.
 INPUTS_DIR_ENV = "FIR_INPUTS_DIR"
+#: The attestation contract (registry.schema.json): ``YYYY-MM-DD JP: <text>``,
+#: no surrounding whitespace, non-blank text. Anything else fails closed.
+ATTESTATION_RE = re.compile(r"\d{4}-\d{2}-\d{2} JP: \S(?:.*\S)?")
 #: The private overlay: a list of ``{provider, model_id, <private field>...}``
 #: rows merged onto the tracked registry by (provider, model_id).
 OVERLAY_NAME = "providers.local.json"
@@ -42,9 +49,21 @@ def load_providers() -> list[dict[str, Any]]:
 
 
 def private_overlay_path() -> Path | None:
-    """``$FIR_INPUTS_DIR/providers.local.json`` when the variable is set."""
+    """``$FIR_INPUTS_DIR/providers.local.json``; see ``INPUTS_DIR_ENV``."""
     inputs_dir = os.environ.get(INPUTS_DIR_ENV)
-    return Path(inputs_dir) / OVERLAY_NAME if inputs_dir else None
+    if inputs_dir is not None:
+        return Path(inputs_dir) / OVERLAY_NAME if inputs_dir else None
+    checkout = DATA_DIR.parent
+    for ancestor in checkout.parents:
+        candidate = ancestor / "_private" / checkout.name
+        if candidate.is_dir():
+            return candidate / OVERLAY_NAME
+    return None
+
+
+def valid_attestation(value: object) -> bool:
+    """True only for a string on the attestation contract."""
+    return isinstance(value, str) and ATTESTATION_RE.fullmatch(value) is not None
 
 
 def _apply_overlay(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -56,8 +75,14 @@ def _apply_overlay(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
     if not isinstance(rows, list):
         raise ValueError(f"{OVERLAY_NAME} must be a list of partial rows")
     by_key = {(e["provider"], e["model_id"]): e for e in data}
+    seen: set[tuple[Any, Any]] = set()
     for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError(f"{OVERLAY_NAME} rows must be objects, got {row!r}")
         key = (row.get("provider"), row.get("model_id"))
+        if key in seen:
+            raise ValueError(f"{OVERLAY_NAME} names {key[0]}/{key[1]} twice")
+        seen.add(key)
         extra = set(row) - {"provider", "model_id"} - OVERLAY_FIELDS
         if extra:
             raise ValueError(
@@ -67,6 +92,11 @@ def _apply_overlay(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if key not in by_key:
             raise ValueError(
                 f"{OVERLAY_NAME} names {key[0]}/{key[1]}, not in the registry"
+            )
+        if not valid_attestation(row.get("billing_disabled_attested")):
+            raise ValueError(
+                f"{OVERLAY_NAME}: {key[0]}/{key[1]} attestation is not"
+                " 'YYYY-MM-DD JP: <text>'"
             )
         by_key[key].update({k: row[k] for k in OVERLAY_FIELDS if k in row})
     return data
@@ -78,7 +108,7 @@ def billing_attested(entry: dict[str, Any]) -> bool:
     Ungated rows need no attestation."""
     if not entry.get("billing_gated"):
         return True
-    return bool(entry.get("billing_disabled_attested"))
+    return valid_attestation(entry.get("billing_disabled_attested"))
 
 
 def load_classification() -> dict[str, Any]:

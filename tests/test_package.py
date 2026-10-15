@@ -59,7 +59,8 @@ def test_tracked_registry_carries_no_attestation_value() -> None:
 def test_without_overlay_gated_rows_stay_unattested(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    """``FIR_INPUTS_DIR=""`` is the explicit off switch (the suite's default)."""
+    monkeypatch.setenv("FIR_INPUTS_DIR", "")
     gated = [e for e in router.load_providers() if e.get("billing_gated")]
     assert gated and all(e["billing_disabled_attested"] is None for e in gated)
 
@@ -129,3 +130,87 @@ def test_overlay_must_be_a_list(
     _overlay(tmp_path, monkeypatch, {"provider": "google"})
     with pytest.raises(ValueError, match="list"):
         router.load_providers()
+
+
+def test_unset_env_finds_the_private_sibling_of_the_checkout(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """No launcher exports the variable, so an unset env searches upward from
+    the package for ``_private/<checkout name>/providers.local.json``; nothing
+    found means no overlay."""
+    pkg = tmp_path / "root" / "checkout" / "router"
+    pkg.mkdir(parents=True)
+    monkeypatch.setattr(router, "DATA_DIR", pkg)
+    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    assert router.private_overlay_path() is None
+    private = tmp_path / "root" / "_private" / "checkout"
+    private.mkdir(parents=True)
+    assert router.private_overlay_path() == private / "providers.local.json"
+    monkeypatch.setenv("FIR_INPUTS_DIR", "")
+    assert router.private_overlay_path() is None
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        True,
+        1,
+        {"a": 1},
+        "",
+        "   ",
+        "2026-01-01 JP:",
+        "2026-01-01 JP:  ",
+        " 2026-01-01 JP: x",
+        "2026-01-01 JP: x ",
+        "JP: x",
+        None,
+    ],
+)
+def test_overlay_rejects_an_attestation_off_the_contract(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, value: object
+) -> None:
+    """The schema pattern (``YYYY-MM-DD JP: <text>``) is the contract; the
+    overlay fails closed on anything else instead of opening the gate."""
+    _overlay(
+        tmp_path,
+        monkeypatch,
+        [
+            {
+                "provider": GOOGLE[0],
+                "model_id": GOOGLE[1],
+                "billing_disabled_attested": value,
+            },
+        ],
+    )
+    with pytest.raises(ValueError, match="attestation"):
+        router.load_providers()
+
+
+def test_overlay_rejects_duplicate_rows(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    row = {
+        "provider": GOOGLE[0],
+        "model_id": GOOGLE[1],
+        "billing_disabled_attested": "2026-01-01 JP: fixture",
+    }
+    _overlay(tmp_path, monkeypatch, [row, dict(row)])
+    with pytest.raises(ValueError, match="twice"):
+        router.load_providers()
+
+
+def test_overlay_rejects_a_non_dict_row(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _overlay(tmp_path, monkeypatch, ["google"])
+    with pytest.raises(ValueError, match="object"):
+        router.load_providers()
+
+
+@pytest.mark.parametrize("value", [True, 1, "yes", "   ", "2026-01-01 JP: "])
+def test_billing_attested_accepts_only_the_contract(value: object) -> None:
+    gated = {"billing_gated": True, "billing_disabled_attested": value}
+    assert not router.billing_attested(gated)
+    assert router.billing_attested(
+        {"billing_gated": True, "billing_disabled_attested": "2026-01-01 JP: x"}
+    )
