@@ -43,3 +43,10 @@ def git_repo_with_committed_secret(git_repo: Path) -> Path:
     _git("add", "leaked.txt", cwd=git_repo)
     _git("commit", "-m", "oops", cwd=git_repo)
     return git_repo
+
+
+@pytest.fixture(autouse=True)
+def _no_private_overlay(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The suite never reads the operator's overlay: ``FIR_INPUTS_DIR=""`` is
+    the explicit off switch; a test that wants an overlay sets its own dir."""
+    monkeypatch.setenv("FIR_INPUTS_DIR", "")

@@ -35,8 +35,14 @@ billing-gated row (`billing_gated: true`, Google's free tier) ships with
 runner until the operator attests it in `$FIR_INPUTS_DIR/providers.local.json`:
 a list of `{"provider", "model_id", "billing_disabled_attested"}` rows merged
 onto the tracked registry per provider+model. The overlay may only attest; a
-row that sets any other key, or names a pair not in the registry, fails the
-load. `FIR_INPUTS_DIR` unset (a public checkout, CI) means no overlay.
+row that sets any other key, names a pair not in the registry or twice, or
+carries an attestation off the contract (`YYYY-MM-DD JP: <text>`, a string,
+no surrounding whitespace) fails the load. `FIR_INPUTS_DIR=""` means no
+overlay (the test suite's default); unset, the loader looks for
+`_private/free-inference-router/` beside each ancestor of the checkout. The name
+is fixed, never the checkout's folder name, so a clone under an operator
+workspace finds the overlay whatever the clone is called, and a public checkout
+finds nothing. Anywhere else, set `FIR_INPUTS_DIR`.
 
 ## Local provider (bench lane)
 
