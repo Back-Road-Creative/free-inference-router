@@ -19,10 +19,13 @@ DATA_DIR = Path(__file__).resolve().parent
 
 #: Directory holding the operator's private inputs. Set to a path: that dir.
 #: Set to "" (the test suite's default): no overlay. Unset: the first
-#: ``_private/<checkout name>`` beside an ancestor of the checkout, if any —
-#: no launcher exports the variable, so the bench lane finds the operator's
-#: layer on its own. No overlay means every billing-gated row stays refused.
+#: ``_private/<PRIVATE_DIR_NAME>`` beside an ancestor of the checkout — a fixed
+#: name, never the checkout's own folder name, so a clone finds the operator's
+#: layer whatever it is called and no launcher has to export the variable. No
+#: overlay means every billing-gated row stays refused.
 INPUTS_DIR_ENV = "FIR_INPUTS_DIR"
+#: The operator's private-inputs dir name, searched beside each ancestor.
+PRIVATE_DIR_NAME = "free-inference-router"
 #: The attestation contract (registry.schema.json): ``YYYY-MM-DD JP: <text>``,
 #: no surrounding whitespace, non-blank text. Anything else fails closed.
 ATTESTATION_RE = re.compile(r"\d{4}-\d{2}-\d{2} JP: \S(?:.*\S)?")
@@ -53,9 +56,8 @@ def private_overlay_path() -> Path | None:
     inputs_dir = os.environ.get(INPUTS_DIR_ENV)
     if inputs_dir is not None:
         return Path(inputs_dir) / OVERLAY_NAME if inputs_dir else None
-    checkout = DATA_DIR.parent
-    for ancestor in checkout.parents:
-        candidate = ancestor / "_private" / checkout.name
+    for ancestor in DATA_DIR.parent.parents:
+        candidate = ancestor / "_private" / PRIVATE_DIR_NAME
         if candidate.is_dir():
             return candidate / OVERLAY_NAME
     return None

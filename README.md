@@ -39,8 +39,10 @@ row that sets any other key, names a pair not in the registry or twice, or
 carries an attestation off the contract (`YYYY-MM-DD JP: <text>`, a string,
 no surrounding whitespace) fails the load. `FIR_INPUTS_DIR=""` means no
 overlay (the test suite's default); unset, the loader looks for
-`_private/<checkout name>/` beside an ancestor of the checkout, so an operator
-workspace needs no launcher change and a public checkout finds nothing.
+`_private/free-inference-router/` beside each ancestor of the checkout. The name
+is fixed, never the checkout's folder name, so a clone under an operator
+workspace finds the overlay whatever the clone is called, and a public checkout
+finds nothing. Anywhere else, set `FIR_INPUTS_DIR`.
 
 ## Local provider (bench lane)
 

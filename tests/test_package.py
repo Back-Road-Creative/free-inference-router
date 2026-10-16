@@ -136,17 +136,45 @@ def test_unset_env_finds_the_private_sibling_of_the_checkout(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """No launcher exports the variable, so an unset env searches upward from
-    the package for ``_private/<checkout name>/providers.local.json``; nothing
-    found means no overlay."""
+    the package for ``_private/free-inference-router/providers.local.json``;
+    nothing found means no overlay."""
     pkg = tmp_path / "root" / "checkout" / "router"
     pkg.mkdir(parents=True)
     monkeypatch.setattr(router, "DATA_DIR", pkg)
     monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
     assert router.private_overlay_path() is None
-    private = tmp_path / "root" / "_private" / "checkout"
+    private = tmp_path / "root" / "_private" / "free-inference-router"
     private.mkdir(parents=True)
     assert router.private_overlay_path() == private / "providers.local.json"
     monkeypatch.setenv("FIR_INPUTS_DIR", "")
+    assert router.private_overlay_path() is None
+
+
+@pytest.mark.parametrize("checkout", ["free-inference-router", "fir-clone", "x"])
+def test_lookup_does_not_depend_on_the_checkout_folder_name(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, checkout: str
+) -> None:
+    """A clone finds ``_private/free-inference-router`` whatever its own folder
+    is called: the lookup uses the fixed ``PRIVATE_DIR_NAME``."""
+    pkg = tmp_path / "ws" / ".data" / "pilot" / checkout / "router"
+    pkg.mkdir(parents=True)
+    monkeypatch.setattr(router, "DATA_DIR", pkg)
+    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    private = tmp_path / "ws" / "_private" / router.PRIVATE_DIR_NAME
+    private.mkdir(parents=True)
+    assert router.private_overlay_path() == private / "providers.local.json"
+
+
+def test_unrelated_private_dir_named_like_the_checkout_is_ignored(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A ``_private/<checkout folder>`` that is not one of the fixed names is
+    someone else's inputs, never this package's overlay."""
+    pkg = tmp_path / "ws" / "some-other-name" / "router"
+    pkg.mkdir(parents=True)
+    monkeypatch.setattr(router, "DATA_DIR", pkg)
+    monkeypatch.delenv("FIR_INPUTS_DIR", raising=False)
+    (tmp_path / "ws" / "_private" / "some-other-name").mkdir(parents=True)
     assert router.private_overlay_path() is None
 
 
